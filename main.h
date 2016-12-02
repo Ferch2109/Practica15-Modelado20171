@@ -62,6 +62,7 @@ size_t longitud(Lista lista);
 //Recomiendo apoyarte de tu función 'cmp_int', qsort y un arreglo
 void ordena_lista(Lista lista, int(*cmp)(const void*, const void*));
 
+/*Ordena de modo que el primer elemento de la lista es el de mayor repeticion*/
 int cmp( const void* a, const void* b);
 
 
