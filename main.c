@@ -11,7 +11,7 @@ int main(int argc, char const *argv[])
         imprime_instrucciones();
         return 0;
     }else{
-	    FILE *file = fopen( argv[argc-1], "r" );
+	    FILE *file = fopen( argv[argc-1], "w" );
 	    
 	    //sino entonces calcula la palabra con mayor repeticion por documento.
 	    printf( "Nombre del archivo\t\tPalabra más repetida\t\tNúmero de repeticiones\n");
@@ -41,22 +41,24 @@ void calcula_repeticiones( char const * arch, FILE *destino ){
 
 	FILE *file;
 	file = fopen( arch, "r" );
-	char cadena[100];
+	char cadena[1000];
 	Lista lista = crea_lista();
+	Palabra *nueva;
 
-	while( !feof(file) ){
-		fscanf( file, "%s ,.-", cadena );
-		Palabra *nueva = malloc( sizeof( Palabra ) );
-		nueva -> palabra = cadena;
-		nueva -> c = 1;
-		inserta_elemento(lista,nueva);
-	}
-
+    while(fgets(cadena, 1000, file)){
+        char *iterador = strtok(cadena, " ,.-\n\r");
+        while(iterador != NULL) {
+            Palabra * nueva = malloc(sizeof(Palabra));
+            char *  palabra = malloc(strlen(iterador)+1);
+            strcpy(palabra,iterador);
+            nueva->palabra = palabra;
+            nueva->c = 1;
+            inserta_elemento(lista, nueva);
+            iterador = strtok (NULL, " ,.-\n\r");
+        }
+}
 	ordena_lista(lista,&cmp);
-	imprime_lista(lista);
-	
 	Elemento *cabeza = *lista;
-
 	printf("%s\t\t\t", (cabeza -> valor -> palabra) );
 	fprintf( destino, "%s\t\t\t", (cabeza -> valor -> palabra) );
 
@@ -70,6 +72,33 @@ void calcula_repeticiones( char const * arch, FILE *destino ){
 
 //LISTAS
 /***********************************************************************************/
+
+
+/*Inserta un elemento en la lista y se regresa el nuevo tamanio de la lista*/
+void inserta_elemento(Lista lista, Palabra * valor){
+	//creamos un iterador para recorrer la lista
+	Elemento* iterador;
+	//nos situamos en el primer elemento.
+	iterador = *lista;
+	//recorremos la lista
+	while( iterador != NULL ){
+		if( strcmp( iterador -> valor -> palabra, valor -> palabra ) == 0 ){
+			iterador -> valor -> c++;
+			return;
+		}
+		iterador = iterador -> siguiente;
+	}
+	//creamos un puntero que apuntará al nuevo elemento
+	Elemento* nuevo = malloc( sizeof( Elemento ) );
+	//asignamos el nuevo valor
+	nuevo -> valor = valor;
+	//apuntamos el elemento a la cabeza de la lista
+	nuevo -> siguiente = *lista;
+	//apuntamos la lista al nuevo elemento
+	*lista = nuevo;
+	
+}
+
 /*Libera(free) la memoria ocupada por la lista, sus elementos y valores*/
 //No se te olvide liberar la memoria de cada elemento y su valor.
 void borra_lista(Lista lista){
@@ -163,31 +192,6 @@ Lista crea_lista(){
 	Lista lista = malloc( sizeof( Lista ) );
 	return lista;
 
-}
-
-/*Inserta un elemento en la lista y se regresa el nuevo tamanio de la lista*/
-void inserta_elemento(Lista lista, Palabra * valor){
-	//creamos un iterador para recorrer la lista
-	Elemento* iterador;
-	//nos situamos en el primer elemento.
-	iterador = *lista;
-	//recorremos la lista
-	while( iterador != NULL ){
-		if( strcmp( iterador -> valor -> palabra, valor -> palabra ) == 0 ){
-			iterador -> valor -> c++;
-			return;
-		}
-		iterador = iterador -> siguiente;
-	}
-	//creamos un puntero que apuntará al nuevo elemento
-	Elemento* nuevo = malloc( sizeof( Elemento ) );
-	//asignamos el nuevo valor
-	//apuntamos el elemento a la cabeza de la lista
-	nuevo -> siguiente = *lista;
-	nuevo -> valor = valor;
-	//apuntamos la lista al nuevo elemento
-	*lista = nuevo;
-	
 }
 
 /*Imprime los elementos de la lista*/
