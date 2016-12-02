@@ -20,7 +20,7 @@ int main(int argc, char const *argv[])
 	    for( int i = 1; i < argc-1; i++ ){
 	    	printf("%s\t\t\t",argv[i]);
 	    	fprintf( file, "%s\t\t\t",argv[i]);
-	    	calcula_repeticiones( argv[i],file);
+	    	calcula_repeticiones( argv[i],file );
 	    }
 	    printf("Se guardó el resultado en el archivo %s\n", argv[argc-1] );
 	    fclose(file);
@@ -32,7 +32,8 @@ int main(int argc, char const *argv[])
 
 void imprime_instrucciones(){
 
-	printf("Error: El formato de entrada es incorrecto\nUso: cuenta_mala <archivo> [<archivo> [<archivo> ...]] <archivo>");
+	printf("Error: El formato de entrada es incorrecto\n");
+	printf("Uso: nombre_archivo <archivo> [<archivo> [<archivo> ...]] <archivo>\n");
 
 }
 
@@ -40,17 +41,20 @@ void calcula_repeticiones( char const * arch, FILE *destino ){
 
 	FILE *file;
 	file = fopen( arch, "r" );
-	char cadena[10000];
+	char cadena[100];
 	Lista lista = crea_lista();
+
 	while( !feof(file) ){
 		fscanf( file, "%s ,.-", cadena );
 		Palabra *nueva = malloc( sizeof( Palabra ) );
 		nueva -> palabra = cadena;
 		nueva -> c = 1;
-		aumenta(lista,nueva);
+		inserta_elemento(lista,nueva);
 	}
-	ordena_lista(lista,&cmp);
 
+	ordena_lista(lista,&cmp);
+	imprime_lista(lista);
+	
 	Elemento *cabeza = *lista;
 
 	printf("%s\t\t\t", (cabeza -> valor -> palabra) );
@@ -60,16 +64,9 @@ void calcula_repeticiones( char const * arch, FILE *destino ){
 	fprintf(destino, "%d\n", cabeza-> valor -> c );
 
 	fclose(file);
-	//borra_lista(lista);
+	borra_lista(lista);
 }
 
-void guarda_en_archivo( char const * arch, char linea[] ){
-
-	FILE *file;
-	file = fopen( arch, "w" );
-	fputs(linea, file);
-
-}
 
 //LISTAS
 /***********************************************************************************/
@@ -90,7 +87,6 @@ void borra_lista(Lista lista){
 		//quitamos el elemento de la lista
 		iterador = quita_elemento( lista, 0 );
 		//liberamos ambos campos de ese nodo de la lista
-		free( iterador -> valor -> palabra );
 		free( iterador -> valor );
 		free( iterador );
 		//retomamos el inicio de la lista
@@ -171,40 +167,27 @@ Lista crea_lista(){
 
 /*Inserta un elemento en la lista y se regresa el nuevo tamanio de la lista*/
 void inserta_elemento(Lista lista, Palabra * valor){
-	//creamos un puntero que apuntará al nuevo elemento
-	Elemento* nuevo;
-
-	// sino, reservamos espacio en memoria para este nuevo valor
-	nuevo = malloc( sizeof( Elemento ) );
-	//asignamos el nuevo valor
-	//apuntamos el elemento a la cabeza de la lista
-	nuevo -> valor = valor;
-	nuevo -> siguiente = *lista;
-	//apuntamos la lista al nuevo elemento
-	*lista = nuevo;
-}
-
-/*Aumenta el contador de ese elemento en uno*/
-void aumenta(Lista lista, Palabra * valor){
-	
 	//creamos un iterador para recorrer la lista
 	Elemento* iterador;
 	//nos situamos en el primer elemento.
 	iterador = *lista;
 	//recorremos la lista
-	printf("<--->\n");
-	imprime_lista(lista);
-	printf("--->%s\n", valor ->palabra );
 	while( iterador != NULL ){
-		printf("<%s>\n", iterador ->valor->palabra );
 		if( strcmp( iterador -> valor -> palabra, valor -> palabra ) == 0 ){
 			iterador -> valor -> c++;
 			return;
 		}
 		iterador = iterador -> siguiente;
 	}
-	inserta_elemento(lista,valor);
-		
+	//creamos un puntero que apuntará al nuevo elemento
+	Elemento* nuevo = malloc( sizeof( Elemento ) );
+	//asignamos el nuevo valor
+	//apuntamos el elemento a la cabeza de la lista
+	nuevo -> siguiente = *lista;
+	nuevo -> valor = valor;
+	//apuntamos la lista al nuevo elemento
+	*lista = nuevo;
+	
 }
 
 /*Imprime los elementos de la lista*/
